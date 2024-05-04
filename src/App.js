@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import WelcomePage from './components/welcome';
 import ListingPage from './components/listing';
+import ModifyEmployee from './components/modify'
 
 const App = () => {
   const [employees, setEmployees] = useState([]);
@@ -20,7 +21,6 @@ const App = () => {
 
   const handleModifyEmployee = (index) => {
     setEditingIndex(index);
-    // Implement modify logic (e.g., prefill form with employee details for editing)
   };
 
   const handleSaveEmployee = (modifiedEmployee) => {
@@ -48,8 +48,13 @@ const App = () => {
         onDeleteEmployee={handleDeleteEmployee}
         onModifyEmployee={handleModifyEmployee}
       />
-      {/* Render ModifyEmployee component conditionally based on editingIndex */}
-      {/* <ModifyEmployee employee={employees[editingIndex]} onSave={handleSaveEmployee} /> */}
+      {editingIndex !== null && (
+        <ModifyEmployee
+          employee={employees[editingIndex]}
+          onSave={handleSaveEmployee}
+          onCancel={() => setEditingIndex(null)}
+        />
+      )}
     </div>
   );
 };
