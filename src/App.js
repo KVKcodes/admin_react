@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import WelcomePage from './components/welcome';
 import ListingPage from './components/listing';
-import ModifyEmployee from './components/modify'
+import ModifyEmployee from './components/modify';
 
 const App = () => {
   const [employees, setEmployees] = useState([]);
@@ -9,25 +9,79 @@ const App = () => {
   const [filterSalary, setFilterSalary] = useState('');
   const [editingIndex, setEditingIndex] = useState(null);
 
-  const handleAddEmployee = (newEmployee) => {
-    setEmployees([...employees, newEmployee]);
+  // Fetch all employees from Flask backend when component mounts
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/employees');
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch employees');
+      }
+  
+      const data = await response.json();
+      setEmployees(data);
+    } catch (error) {
+      console.error('Error fetching employees:', error.message);
+    }
   };
 
-  const handleDeleteEmployee = (index) => {
-    const updatedEmployees = [...employees];
-    updatedEmployees.splice(index, 1);
-    setEmployees(updatedEmployees);
+  const handleAddEmployee = async (newEmployee) => {
+    try {
+      const response = await fetch('http://127.0.0.1:5000/employees', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newEmployee),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add employee');
+      }
+      await fetchEmployees(); // Refresh employees after adding
+    } catch (error) {
+      console.error('Error adding employee:', error.message);
+    }
+  };
+
+  const handleDeleteEmployee = async (id) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/employees/${id}`, {
+        method: 'DELETE',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete employee');
+      }
+      await fetchEmployees(); // Refresh employees after deleting
+    } catch (error) {
+      console.error('Error deleting employee:', error.message);
+    }
   };
 
   const handleModifyEmployee = (index) => {
     setEditingIndex(index);
   };
 
-  const handleSaveEmployee = (modifiedEmployee) => {
-    const updatedEmployees = [...employees];
-    updatedEmployees[editingIndex] = modifiedEmployee;
-    setEmployees(updatedEmployees);
-    setEditingIndex(null); // Reset editing state
+  const handleSaveEmployee = async (modifiedEmployee) => {
+    try {
+      const response = await fetch(`http://127.0.0.1:5000/employees/${modifiedEmployee.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(modifiedEmployee),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update employee');
+      }
+      await fetchEmployees(); // Refresh employees after updating
+      setEditingIndex(null); // Reset editing state
+    } catch (error) {
+      console.error('Error updating employee:', error.message);
+    }
   };
 
   const filteredEmployees = employees.filter(

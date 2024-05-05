@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 
 const WelcomePage = ({ onAddEmployee }) => {
+  const [id, setId] = useState('');
   const [name, setName] = useState('');
   const [salary, setSalary] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onAddEmployee({ name, salary });
+    onAddEmployee({ id, name, salary });
     setName('');
     setSalary('');
   };
